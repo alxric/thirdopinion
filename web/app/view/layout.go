@@ -23,6 +23,7 @@ type LayoutState struct {
 // LayoutProps contains the initial elements needed to generate a view
 type LayoutProps struct {
 	arguments []*config.Argument
+	Error     string
 }
 
 // Layout creates instances of the Layout component
@@ -45,14 +46,36 @@ func (l LayoutDef) Render() react.Element {
 	vp := ViewProps{
 		arguments: l.Props().arguments,
 	}
-	return react.Fragment(
-		h.Render(),
-		react.Div(
-			&react.DivProps{
-				ClassName: "container-fluid",
-			},
-			react.Div(nil, View(vp)),
-		),
-		f.Render(),
-	)
+	switch l.Props().Error {
+	case "":
+		return react.Fragment(
+			h.Render(),
+			react.Div(
+				&react.DivProps{
+					ClassName: "container-fluid",
+				},
+				react.Div(nil, View(vp)),
+			),
+			f.Render(),
+		)
+	default:
+		return react.Fragment(
+			h.Render(),
+			react.Div(
+				&react.DivProps{
+					ClassName: "container-fluid",
+				},
+				react.Div(
+					&react.DivProps{
+						ID: "ViewError",
+					},
+					react.H1(nil,
+						react.S("An error has occured"),
+					),
+					react.S(l.Props().Error),
+				),
+			),
+			f.Render(),
+		)
+	}
 }

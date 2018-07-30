@@ -30,9 +30,13 @@ func main() {
 
 	e.Static("/static", "web/static")
 	e.Renderer = t
+	e.GET("/", handlers.View)
 	e.GET("/create", handlers.Create)
+
 	e.GET("/view", handlers.View)
 	e.GET("/view/*", handlers.View)
+
+	e.GET("/register*", handlers.Register)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))

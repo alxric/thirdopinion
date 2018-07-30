@@ -26,7 +26,7 @@ func (l HeaderDef) Render() react.Element {
 		},
 		react.A(
 			&react.AProps{
-				Href: "/view",
+				Href: "/",
 			},
 			react.Img(
 				&react.ImgProps{

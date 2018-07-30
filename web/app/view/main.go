@@ -19,15 +19,7 @@ import (
 var document = dom.GetWindow().Document()
 
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(1)
-	argumentID := generateFilter()
-	ch, err := fetchPost(argumentID)
-	if err != nil {
-		renderError(&wg)
-	}
-	go readChan(ch, &wg)
-	wg.Wait()
+	loadData()
 }
 
 func generateFilter() (argumentID string) {
@@ -39,17 +31,36 @@ func generateFilter() (argumentID string) {
 	return
 }
 
+func loadData() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	argumentID := generateFilter()
+	ch, err := fetchPost(argumentID)
+	switch err {
+	case nil:
+		go readChan(ch, &wg)
+	default:
+		handleError(&wg)
+	}
+	wg.Wait()
+
+}
+
 func readChan(ch chan *messageEvent, wg *sync.WaitGroup) {
 	domTarget := document.GetElementByID("app")
-
 	args := []*config.Argument{}
 	defer wg.Done()
 	select {
 	case msg := <-ch:
-		err := json.Unmarshal([]byte(msg.Data.String()), &args)
-		if err != nil {
-			fmt.Println(err)
-			return
+		switch msg.Code.String() {
+		case "1006":
+			renderError("Websocket connection not working", domTarget)
+		default:
+			err := json.Unmarshal([]byte(msg.Data.String()), &args)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 	lp := LayoutProps{
@@ -58,7 +69,15 @@ func readChan(ch chan *messageEvent, wg *sync.WaitGroup) {
 	react.Render(Layout(lp), domTarget)
 }
 
-func renderError(wg *sync.WaitGroup) {
+func handleError(wg *sync.WaitGroup) {
 	defer wg.Done()
 	fmt.Println("Broken. Fix this Alex!")
+}
+
+func renderError(msg string, domTarget dom.Element) {
+	lp := LayoutProps{
+		Error: msg,
+	}
+	react.Render(Layout(lp), domTarget)
+
 }

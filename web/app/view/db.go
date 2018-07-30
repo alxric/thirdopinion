@@ -2,10 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"strconv"
-	"strings"
 	"thirdopinion/internal/pkg/config"
 
 	"github.com/gopherjs/gopherjs/js"
@@ -15,13 +12,14 @@ import (
 type messageEvent struct {
 	*js.Object
 	Data *js.Object `js:"data"`
+	Code *js.Object `js:"code"`
 }
 
 func fetchPost(argumentID string) (chan *messageEvent, error) {
 	url := "ws://localhost:8081/ws"
 	ws, err := websocketjs.New(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	var iArgumentID int
 	switch argumentID {
@@ -36,12 +34,12 @@ func fetchPost(argumentID string) (chan *messageEvent, error) {
 	wsr := &config.WSRequest{
 		Method: "GetArguments",
 		Argument: &config.Argument{
-			ID: iArgumentID,
+			ID: int64(iArgumentID),
 		},
 	}
 	b, err := json.Marshal(wsr)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	ch := make(chan *messageEvent, 1)
@@ -57,26 +55,25 @@ func fetchPost(argumentID string) (chan *messageEvent, error) {
 		msg := &messageEvent{Object: ev}
 		ch <- msg
 	}
+
+	onError := func(ev *js.Object) {
+	}
+
+	onClose := func(ev *js.Object) {
+		msg := &messageEvent{Object: ev}
+		ch <- msg
+	}
+
 	ws.AddEventListener("open", false, onOpen)
 	ws.AddEventListener("message", false, onMessage)
+	ws.AddEventListener("error", false, onError)
+	ws.AddEventListener("close", false, onClose)
 	return ch, nil
 }
 
-func voteDB(buttonID string) (chan *messageEvent, error) {
+func voteDB(argID int, person int) (chan *messageEvent, error) {
 	url := "ws://localhost:8081/ws"
 	ws, err := websocketjs.New(url)
-	if err != nil {
-		return nil, err
-	}
-	idVals := strings.Split(buttonID, "_")
-	if len(idVals) != 3 {
-		return nil, fmt.Errorf("Invalid button ID")
-	}
-	argID, err := strconv.Atoi(idVals[1])
-	if err != nil {
-		return nil, err
-	}
-	person, err := strconv.Atoi(idVals[2])
 	if err != nil {
 		return nil, err
 	}

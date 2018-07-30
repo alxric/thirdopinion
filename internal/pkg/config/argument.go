@@ -4,10 +4,11 @@ import "time"
 
 // Argument defines a full argument
 type Argument struct {
-	ID           int        `json:"id"`
+	ID           int64      `json:"id"`
 	Title        string     `json:"title"`
 	CreationTime time.Time  `json:"creation_time"`
 	Opinions     []*Opinion `json:"opinions"`
+	Votes        Votes      `json:"votes"`
 }
 
 // Opinion defines an individual opinion
@@ -16,6 +17,12 @@ type Opinion struct {
 	Person       int       `json:"person"`
 	CreationTime time.Time `json:"creation_time"`
 	Text         string    `json:"text"`
+}
+
+// Votes contains the votes an argument has gotten
+type Votes struct {
+	Person1 int64 `json:"person_1"`
+	Person2 int64 `json:"person_2"`
 }
 
 // CreationResult is the struct used to communicate creation results

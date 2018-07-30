@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"math"
+	"strconv"
+	"strings"
 	"thirdopinion/internal/pkg/config"
 
 	"honnef.co/go/js/dom"
@@ -59,7 +63,7 @@ func (t ViewDef) Render() react.Element {
 }
 
 func (t ViewDef) generateArguments() (arguments []react.Element) {
-	for _, arg := range t.Props().arguments {
+	for index, arg := range t.Props().arguments {
 		var opinions []react.Element
 		for _, opinion := range arg.Opinions {
 			opDiv := react.Div(
@@ -100,18 +104,46 @@ func (t ViewDef) generateArguments() (arguments []react.Element) {
 				},
 				opinions...,
 			),
-			t.generateVoteArea(arg),
+			t.generateVoteArea(arg, index),
 		)
 		arguments = append(arguments, argument)
 	}
 	return
 }
 
-func (t ViewDef) generateVoteArea(arg *config.Argument) (voteArea react.Element) {
+func (t ViewDef) generateVoteArea(arg *config.Argument, index int) (voteArea react.Element) {
+	totalVotes := float64(arg.Votes.Person1) + float64(arg.Votes.Person2)
 	voteArea = react.Div(
 		&react.DivProps{
 			ClassName: "voteWrapper",
 		},
+		react.Div(
+			&react.DivProps{
+				ClassName: "voteHeader",
+			},
+			react.S("Votes so far"),
+		),
+		react.Div(
+			&react.DivProps{
+				ClassName: "voteDisplay",
+			},
+			react.Span(
+				&react.SpanProps{
+					ClassName: "person1 voteSpan",
+				},
+				react.S(fmt.Sprintf("%d (%d%%)", arg.Votes.Person1,
+					int64(math.Round(100*(float64(arg.Votes.Person1)/totalVotes)))),
+				),
+			),
+			react.Span(
+				&react.SpanProps{
+					ClassName: "person2 voteSpaG",
+				},
+				react.S(fmt.Sprintf("%d (%d%%)", arg.Votes.Person2,
+					int64(math.Round(100*(float64(arg.Votes.Person2)/totalVotes)))),
+				),
+			),
+		),
 		react.Div(
 			&react.DivProps{
 				ClassName: "voteHeader",
@@ -125,7 +157,7 @@ func (t ViewDef) generateVoteArea(arg *config.Argument) (voteArea react.Element)
 			react.Button(
 				&react.ButtonProps{
 					Type:      "submit",
-					ID:        fmt.Sprintf("voteButton_%d_1", arg.ID),
+					ID:        fmt.Sprintf("voteButton_%d_%d_1", index, arg.ID),
 					ClassName: "btn btn-default person1",
 					OnClick:   vote{t},
 				},
@@ -139,7 +171,7 @@ func (t ViewDef) generateVoteArea(arg *config.Argument) (voteArea react.Element)
 			react.Button(
 				&react.ButtonProps{
 					Type:      "submit",
-					ID:        fmt.Sprintf("voteButton_%d_2", arg.ID),
+					ID:        fmt.Sprintf("voteButton_%d_%d_2", index, arg.ID),
 					ClassName: "btn btn-default person2",
 					OnClick:   vote{t},
 				},
@@ -159,9 +191,14 @@ type vote struct{ t ViewDef }
 
 func (v vote) OnClick(se *react.SyntheticMouseEvent) {
 	target := se.Target().(*dom.HTMLButtonElement)
-	se.PreventDefault()
 
-	ch, err := voteDB(target.ID())
+	bv, err := parseButtonID(target.ID())
+	if err != nil {
+		fmt.Println("Invalid button ID")
+		return
+	}
+
+	ch, err := voteDB(bv.ArgID, bv.Person)
 	if err != nil {
 		fmt.Println("Error occured. Fix this alex!!!!")
 		fmt.Println(err)
@@ -169,7 +206,59 @@ func (v vote) OnClick(se *react.SyntheticMouseEvent) {
 	go func() {
 		select {
 		case msg := <-ch:
-			fmt.Println(msg.Data.String())
+			wsr := &config.WSResponse{}
+			err := json.Unmarshal([]byte(msg.Data.String()), wsr)
+			if err != nil {
+				fmt.Println("Could not unmarshal wsr for vote. This should genereate a proper error Alex!!")
+			}
+			switch wsr.Error {
+			case "":
+				switch wsr.Msg {
+				case "Voted":
+					switch bv.Person {
+					case 1:
+						v.t.Props().arguments[bv.Index].Votes.Person1++
+					case 2:
+						v.t.Props().arguments[bv.Index].Votes.Person2++
+					}
+					v.t.ForceUpdate()
+					v.t.Render()
+				}
+			default:
+				fmt.Println("WSR contains error! This should generate a proper error Alex!!!")
+			}
 		}
 	}()
+}
+
+type buttonVals struct {
+	Index  int
+	ArgID  int
+	Person int
+}
+
+func parseButtonID(id string) (*buttonVals, error) {
+	idVals := strings.Split(id, "_")
+	if len(idVals) != 4 {
+		return nil, fmt.Errorf("Invalid button ID")
+	}
+	iIndex, err := strconv.Atoi(idVals[1])
+	if err != nil {
+		return nil, err
+	}
+	iArgID, err := strconv.Atoi(idVals[2])
+	if err != nil {
+		return nil, err
+	}
+	iPerson, err := strconv.Atoi(idVals[3])
+	if err != nil {
+		return nil, err
+	}
+	bv := &buttonVals{
+		Index:  iIndex,
+		ArgID:  iArgID,
+		Person: iPerson,
+	}
+	return bv, nil
+
 }

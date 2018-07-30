@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo"
 )
 
-// View will render the create page
+// View will render the view page
 func View(c echo.Context) error {
 	return c.Render(http.StatusOK, "view", nil)
 }
