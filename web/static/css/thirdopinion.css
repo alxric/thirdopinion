@@ -149,15 +149,15 @@ body, html {
 }
 
 
-#registerContainer {
+#registerContainer, #loginContainer {
 	width: 30%;
 }
 
-.registerRow {
+.registerRow, .loginRow {
 	margin-bottom: 15px;
 }
 
-.registerDiv {
+.registerDiv, .loginDiv {
 	width: 100%;
 }
 
@@ -165,19 +165,14 @@ body, html {
 	margin-right: 15px;
 }
 
-.registerError {
+.registerError, .loginError {
 	line-height: 30px;
 }
 
-#registerEmailInput {
+#registerEmailInput, #registerPasswordInput, #confirmPasswordInput {
 	width: 100%;
 }
 
-#registerPasswordInput {
+#loginEmailInput, #loginPasswordInput {
 	width: 100%;
 }
-
-#confirmPasswordInput {
-	width: 100%;
-}
-

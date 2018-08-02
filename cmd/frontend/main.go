@@ -36,7 +36,8 @@ func main() {
 	e.GET("/view", handlers.View)
 	e.GET("/view/*", handlers.View)
 
-	e.GET("/register*", handlers.Register)
+	e.GET("/register", handlers.Register)
+	e.GET("/login", handlers.Login)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))

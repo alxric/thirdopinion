@@ -5,6 +5,7 @@ type WSRequest struct {
 	Method   string    `json:"method"`
 	Argument *Argument `json:"argument"`
 	Vote     *Vote     `json:"vote"`
+	Register *Register `json:"register"`
 }
 
 // WSResponse is the response from the websocket

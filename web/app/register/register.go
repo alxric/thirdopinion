@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
+	"thirdopinion/internal/pkg/config"
 	"unicode"
 
 	"honnef.co/go/js/dom"
@@ -11,11 +11,6 @@ import (
 )
 
 //go:generate reactGen
-
-var (
-	//emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	emailRegexp = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-)
 
 // RegisterDef is the definition fo the Register component
 type RegisterDef struct {
@@ -30,6 +25,8 @@ type RegisterState struct {
 	emailError    string
 	passwordError string
 	confirmError  string
+	registerError string
+	registered    bool
 }
 
 // Register creates instances of the Register component
@@ -54,11 +51,34 @@ func (c RegisterState) Equals(v RegisterState) bool {
 		return false
 	}
 
+	if c.confirmError != v.confirmError {
+		return false
+	}
+
+	if c.emailError != v.emailError {
+		return false
+	}
+
+	if c.passwordError != v.passwordError {
+		return false
+	}
+
+	if c.registerError != v.registerError {
+		return false
+	}
+
+	if c.registered != v.registered {
+		return false
+	}
+
 	return true
 }
 
 // Render renders the Register component
 func (t RegisterDef) Render() react.Element {
+	if t.State().registered {
+		return t.renderRegistered()
+	}
 	submitClass := "rightFloat"
 	switch {
 	case t.State().email == "", t.State().password == "", t.State().confirm == "":
@@ -212,6 +232,27 @@ func (t RegisterDef) Render() react.Element {
 	)
 }
 
+func (t RegisterDef) renderRegistered() react.Element {
+	return react.Fragment(
+		react.Div(
+			&react.DivProps{
+				ID: "registerContainer",
+			},
+			react.Div(
+				&react.DivProps{
+					ID: "registerHeader",
+				},
+				react.H3(nil,
+					react.S("Account created. You can now login"),
+				),
+				react.H4(nil,
+					react.S("(This needs to be updated with a confirmation email. This is just a conceptional draft)"),
+				),
+			),
+		),
+	)
+}
+
 type inputChange struct{ t RegisterDef }
 
 func (i inputChange) OnChange(se *react.SyntheticEvent) {
@@ -287,7 +328,36 @@ func validateEmail(email string) bool {
 type register struct{ t RegisterDef }
 
 func (r register) OnClick(se *react.SyntheticMouseEvent) {
-	se.PreventDefault()
 	ns := r.t.State()
-	fmt.Println(ns)
+	wsr := &config.WSRequest{
+		Method: "Register",
+		Register: &config.Register{
+			Email:           ns.email,
+			Password:        ns.password,
+			ConfirmPassword: ns.confirm,
+		},
+	}
+	se.PreventDefault()
+	ch := writeDB(wsr)
+
+	go func() {
+		select {
+		case wr := <-ch:
+			if wr.Error != "" {
+				switch wr.Error {
+				case "Passwords do not match":
+					ns.confirmError = wr.Error
+				case "pq: duplicate key value violates unique constraint \"unique_email\"":
+					ns.emailError = "Email address already exists"
+				}
+				ns.registerError = wr.Error
+			}
+			if wr.Msg == "Registered" {
+				ns.registered = true
+			}
+			r.t.SetState(ns)
+			r.t.ForceUpdate()
+			r.t.Render()
+		}
+	}()
 }

@@ -2,29 +2,23 @@ package psql
 
 import (
 	"database/sql"
-	"encoding/json"
 	"thirdopinion/internal/pkg/config"
 
 	log "github.com/mgutz/logxi/v1"
 )
 
 // Create a new argument entry
-func Create(b []byte) (string, error) {
+func Create(arg *config.Argument) (string, error) {
 	db, err := openConn()
 	if err != nil {
 		return "", err
 	}
 	defer db.Close()
-	wsr := &config.WSRequest{}
-	err = json.Unmarshal(b, wsr)
+	lastInsertID, err := createArgument(db, arg.Title)
 	if err != nil {
 		return "", err
 	}
-	lastInsertID, err := createArgument(db, wsr.Argument.Title)
-	if err != nil {
-		return "", err
-	}
-	for _, opinion := range wsr.Argument.Opinions {
+	for _, opinion := range arg.Opinions {
 		err := createOpinion(db, opinion, lastInsertID)
 		if err != nil {
 			log.Error(err.Error())
