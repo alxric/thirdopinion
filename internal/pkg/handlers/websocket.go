@@ -45,13 +45,15 @@ func WS(c echo.Context) error {
 	case "NewArgument":
 		b, err = backend.NewArgument(ws, wsr.Argument)
 	case "GetArguments":
-		b, err = backend.ListArguments(ws, wsr.Argument)
+		b, err = backend.ListArguments(wsr.Argument)
 	case "Vote":
-		b, err = backend.Vote(ws, wsr.Vote)
+		b, err = backend.Vote(wsr.Vote)
 	case "Register":
 		b, err = backend.Register(ws, wsr.Register)
 	case "Login":
-		b, err = backend.Login(ws, wsr.Register)
+		b, err = backend.Login(wsr.Register)
+	case "VerifySession":
+		b, err = backend.VerifySession(ws, wsr.User)
 	}
 	if err != nil {
 		return err

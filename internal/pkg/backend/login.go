@@ -4,18 +4,21 @@ import (
 	"encoding/json"
 	"thirdopinion/internal/pkg/config"
 	"thirdopinion/internal/pkg/psql"
-
-	"github.com/gorilla/websocket"
 )
 
 // Login sends the login request to the database
-func Login(ws *websocket.Conn, r *config.Register) ([]byte, error) {
+func Login(r *config.Register) ([]byte, error) {
 	resp := &config.WSResponse{}
 
-	res, err := psql.Login(r)
+	u, err := psql.Login(r)
 	switch err {
 	case nil:
-		resp.Msg = res
+		err = psql.UpdateSession(u)
+		if err != nil {
+			return nil, err
+		}
+		resp.User = u
+		resp.Msg = "logged in"
 	default:
 		resp.Error = err.Error()
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 // ListArguments lists arguments from the database
-func ListArguments(ws *websocket.Conn, argument *config.Argument) ([]byte, error) {
+func ListArguments(argument *config.Argument) ([]byte, error) {
 	var filter string
 	if argument.ID != 0 {
 		filter = "specificPost"

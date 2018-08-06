@@ -1,1 +1,1 @@
-../../app/view/view.js
+../../app/view/dist/main.js

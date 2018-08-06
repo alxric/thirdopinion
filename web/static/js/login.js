@@ -1,1 +1,1 @@
-../../app/login/login.js
+../../app/login/dist/main.js

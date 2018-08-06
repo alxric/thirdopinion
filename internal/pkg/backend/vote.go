@@ -2,14 +2,16 @@ package backend
 
 import (
 	"encoding/json"
+	"errors"
 	"thirdopinion/internal/pkg/config"
 	"thirdopinion/internal/pkg/psql"
-
-	"github.com/gorilla/websocket"
 )
 
 // Vote writes the supplied vote to Postgres
-func Vote(ws *websocket.Conn, newVote *config.Vote) ([]byte, error) {
+func Vote(newVote *config.Vote) ([]byte, error) {
+	if newVote.User == 0 {
+		return nil, errors.New("Could not detect user ID. Try logging in again")
+	}
 	res, err := psql.Vote(newVote)
 	if err != nil {
 		return nil, err
@@ -22,4 +24,16 @@ func Vote(ws *websocket.Conn, newVote *config.Vote) ([]byte, error) {
 		return nil, err
 	}
 	return b, nil
+}
+
+// UserVotes list all votes for the supplied user key
+func UserVotes(sessionKey string) (map[int]int, error) {
+	if sessionKey == "" {
+		return nil, errors.New("Invalid session key")
+	}
+	votes, err := psql.UserVotes(sessionKey)
+	if err != nil {
+		return nil, err
+	}
+	return votes, nil
 }

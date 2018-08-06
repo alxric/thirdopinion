@@ -39,8 +39,8 @@ func listArgument(db *sql.DB, filter string, filterVals interface{}) ([]*config.
 			CASE WHEN v.person = 1 THEN 1 ELSE 0 END person1,
 			CASE WHEN v.person = 2 THEN 1 ELSE 0 END person2
 			FROM arguments a
-			JOIN votes v ON a.arg_id = v.arg_id
-			WHERE v.person IN (1,2)) t
+			LEFT JOIN votes v ON a.arg_id = v.arg_id
+			WHERE v.person IN (1,2) OR v.person IS NULL) t
 		GROUP BY
 		t.arg_id, t.arg_title,t.arg_create_time`)
 	case "specificPost":
@@ -52,8 +52,8 @@ func listArgument(db *sql.DB, filter string, filterVals interface{}) ([]*config.
 			CASE WHEN v.person = 1 THEN 1 ELSE 0 END person1,
 			CASE WHEN v.person = 2 THEN 1 ELSE 0 END person2
 			FROM arguments a
-			JOIN votes v ON a.arg_id = v.arg_id
-			WHERE v.person IN (1,2)
+			LEFT JOIN votes v ON a.arg_id = v.arg_id
+			WHERE (v.person IN (1,2) or v.person IS NULL)
 			AND a.arg_id= $1) t
 		WHERE t.arg_id = $2
 		GROUP BY

@@ -1,6 +1,8 @@
 package shared
 
-import "myitcv.io/react"
+import (
+	"myitcv.io/react"
+)
 
 //go:generate reactGen
 
