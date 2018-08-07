@@ -13,4 +13,6 @@ TODO
 * Implement metrics & prometheus
 * Implement redis
 * Make a proper design
+* Improve logging
+* Improve database layout
 
