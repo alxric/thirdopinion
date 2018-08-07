@@ -41,3 +41,9 @@ func NewLogin(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, resp)
 }
+
+// Logout logs a user out
+func Logout(c echo.Context) error {
+	deleteCookie(c)
+	return c.String(http.StatusOK, "Loggedout")
+}

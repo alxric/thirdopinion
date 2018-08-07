@@ -11,8 +11,9 @@ type WSRequest struct {
 
 // WSResponse is the response from the websocket
 type WSResponse struct {
-	Error     string      `json:"error"`
-	Msg       string      `json:"msg"`
-	User      *User       `json:"user"`
-	Arguments []*Argument `json:"arguments"`
+	Error      string      `json:"error"`
+	Msg        string      `json:"msg"`
+	User       *User       `json:"user"`
+	Arguments  []*Argument `json:"arguments"`
+	ArgumentID int         `json:"argument_id"`
 }

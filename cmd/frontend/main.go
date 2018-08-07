@@ -42,11 +42,14 @@ func main() {
 	e.GET("/register", handlers.Register)
 	e.GET("/login", handlers.Login)
 	e.POST("/login", handlers.NewLogin)
+	e.POST("/logout", handlers.Logout)
 
 	// API
 	e.POST("/api/session/validate", handlers.ValidateSession)
 	e.GET("/api/arguments", handlers.ListArguments)
 	e.POST("/api/vote", handlers.Vote)
+	e.POST("/api/register", handlers.RegisterUser)
+	e.POST("/api/create", handlers.CreateArgument)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))

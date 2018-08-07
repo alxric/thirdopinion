@@ -1,1 +1,1 @@
-../../app/create/create.js
+../../app/create/dist/main.js

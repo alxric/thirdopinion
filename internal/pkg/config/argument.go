@@ -9,6 +9,7 @@ type Argument struct {
 	CreationTime time.Time  `json:"creation_time"`
 	Opinions     []*Opinion `json:"opinions"`
 	Votes        Votes      `json:"votes"`
+	UserID       int64      `json:"user_id"`
 }
 
 // Opinion defines an individual opinion

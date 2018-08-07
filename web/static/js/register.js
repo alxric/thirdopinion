@@ -1,1 +1,1 @@
-../../app/register/register.js
+../../app/register/dist/main.js

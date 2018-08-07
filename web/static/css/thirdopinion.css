@@ -7,13 +7,19 @@ body, html {
 #header {
 	overflow: hidden;
 	background-color: #A9B7C0;
-    padding: 20px 10px;
+    padding-left: 10px;
 	margin-bottom: 20px;
+	height: 120px;
 }
 
 .header-right {
 	  float: right;
+	  height: 100%;
   }
+
+#header-logged-in {
+	height: 100%;
+}
 
 @media screen and (max-width: 500px) {
 	#header a {
@@ -23,7 +29,18 @@ body, html {
 	}
 	.header-right {
 		float: none;
+		height: 100%;
 	}
+}
+
+.header-menu-item {
+	margin-left: 15px;
+	border-left: 1px solid #CCCCCC;
+	width: 120px;
+	text-align: center;
+	line-height: 120px;
+	cursor: pointer;
+	height: 100%;
 }
 
 #footer {
@@ -161,7 +178,7 @@ body, html {
 	width: 100%;
 }
 
-#registerEmailDiv, #registerPasswordDiv, #confirmPasswordDiv {
+#registerEmailDiv, #registerPasswordDiv, #registerConfirmDiv {
 	margin-right: 15px;
 }
 
@@ -169,10 +186,11 @@ body, html {
 	line-height: 30px;
 }
 
-#registerEmailInput, #registerPasswordInput, #confirmPasswordInput {
+#registerEmailInput, #registerPasswordInput, #registerConfirmInput {
 	width: 100%;
 }
 
 #loginEmailInput, #loginPasswordInput {
 	width: 100%;
 }
+

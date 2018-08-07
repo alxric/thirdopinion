@@ -7,12 +7,10 @@ import (
 	"thirdopinion/internal/pkg/config"
 	"thirdopinion/internal/pkg/psql"
 	"unicode"
-
-	"github.com/gorilla/websocket"
 )
 
 // Register sends the register request to the database
-func Register(ws *websocket.Conn, r *config.Register) ([]byte, error) {
+func Register(r *config.Register) ([]byte, error) {
 	resp := &config.WSResponse{}
 	pwOK, pwMsg := validatePassword(r.Password)
 	switch {

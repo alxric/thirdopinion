@@ -26,7 +26,6 @@ export default class Login extends React.Component {
 		var self = this;
 		event.preventDefault();
 		axios.post('/login', {
-			method: 'login',
 			register: {
 				email: this.state.email,
 				password: this.state.password

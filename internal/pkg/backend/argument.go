@@ -2,10 +2,9 @@ package backend
 
 import (
 	"encoding/json"
+	"errors"
 	"thirdopinion/internal/pkg/config"
 	"thirdopinion/internal/pkg/psql"
-
-	"github.com/gorilla/websocket"
 )
 
 // ListArguments lists arguments from the database
@@ -26,29 +25,16 @@ func ListArguments(argument *config.Argument) ([]byte, error) {
 }
 
 // NewArgument writes an argument to the database
-func NewArgument(ws *websocket.Conn, argument *config.Argument) ([]byte, error) {
+func NewArgument(argument *config.Argument) (*config.WSResponse, error) {
 	cr := verifyArgument(argument)
 	if cr.Error != "" {
-		b, err := json.Marshal(cr)
-		if err != nil {
-			ws.WriteMessage(websocket.TextMessage, []byte("Unknown error"))
-			return nil, err
-		}
-		ws.WriteMessage(websocket.TextMessage, b)
-		return nil, err
+		return nil, errors.New(cr.Error)
 	}
-	res, err := psql.Create(argument)
+	resp, err := psql.Create(argument)
 	if err != nil {
 		return nil, err
 	}
-	resp := &config.WSResponse{
-		Msg: res,
-	}
-	b, err := json.Marshal(resp)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
+	return resp, nil
 }
 
 func verifyArgument(arg *config.Argument) config.CreationResult {

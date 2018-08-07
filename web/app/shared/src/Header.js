@@ -1,53 +1,55 @@
-import React from "react";                                                                                                          1
+import React from "react";
+import axios from "axios";
 
-function UserGreeting(props) {
-  return <h1>Welcome back!</h1>;
+function HeaderLink(props) {
+	return (
+		<div class="leftFloat header-menu-item" onClick={props.Obj.handleClick}>
+			{props.Text}
+		</div>
+	);
 }
 
-function GuestGreeting(props) {
-  return <h1>Please sign up.</h1>;
-}
-
-function LoginButton(props) {
-  return (
-    <button onClick={props.onClick}>
-      Login
-    </button>
-  );
-}
-
-function LogoutButton(props) {
-  return (
-    <button onClick={props.onClick}>
-      Logout
-    </button>
-  );
-}
 
 export default class Header extends React.Component {
 	constructor(props) {
 		super(props);
-		 this.handleLoginClick = this.handleLoginClick.bind(this);
-		 this.handleLogoutClick = this.handleLogoutClick.bind(this);
+		this.handleClick = this.handleClick.bind(this);
 	}
 
-	handleLoginClick() {
-		this.setState({isLoggedIn: true});
+	handleClick(event) {
+		switch(event.target.innerHTML) {
+			case "Logout":
+				const client = axios.create({
+					headers: {
+						'X-Requested-With': 'XMLHttpRequest',
+						'X-CSRF-TOKEN' : this.props.SessionKey,
+					},
+				});
+
+				client.post('/logout', {
+				})
+				.then((response) => {
+					window.location.href='/';
+				})
+				.catch(function (error) {
+					console.log(error);
+				});
+				break;
+			case "Login":
+				window.location.href='/login';
+				break;
+			case "Register":
+				window.location.href='/register';
+				break;
+			case "Create":
+				window.location.href='/create';
+				break;
+		}
 	}
 
-	handleLogoutClick() {
-		this.setState({isLoggedIn: false});
-	}
 
 	render() {
 		const isLoggedIn = this.props.Loggedin;
-		let button;
-		if (isLoggedIn) {
-			button = <LogoutButton onClick={this.handleLogoutClick} />;
-		} else {
-			button = <LoginButton onClick={this.handleLoginClick} />
-		}
-
         return (
             <div id="header">
                 <a href="/">
@@ -55,12 +57,19 @@ export default class Header extends React.Component {
                 </a>
                 Get a third opinion and solve your argument once and for all!
                 <div className="header-right">
-                    Some buttons here {this.props.Email}
-					{button}
-					<div id="logout_div">
-						LOGOUT
-					</div>
+					{isLoggedIn ? (
+						<div id="header-logged-in">
+							<HeaderLink Obj={this} Text='Create' />
+							<HeaderLink Obj={this} Text='Logout' />
+						</div>
+					) : (
+						<div id="header-logged-out">
+							<HeaderLink Obj={this} Text='Register' />
+							<HeaderLink Obj={this} Text='Login' />
+						</div>
+					)}
                 </div>
+				<div class="clear"></div>
             </div>
         );
     }

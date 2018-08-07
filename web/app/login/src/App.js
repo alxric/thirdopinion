@@ -15,7 +15,7 @@ export default class App extends React.Component {
     render() {
         return (
 			<div className="window">
-				<Header Loggedin={this.state.loggedin} Email={this.state.email}/>
+				<Header Loggedin={this.state.loggedin} Email={this.state.email} SessionKey={this.state.sessionKey} />
 				<Login Loggedin={this.state.loggedin}/>
 				<Footer />
 			</div>

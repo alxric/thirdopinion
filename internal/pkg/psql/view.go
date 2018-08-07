@@ -42,7 +42,8 @@ func listArgument(db *sql.DB, filter string, filterVals interface{}) ([]*config.
 			LEFT JOIN votes v ON a.arg_id = v.arg_id
 			WHERE v.person IN (1,2) OR v.person IS NULL) t
 		GROUP BY
-		t.arg_id, t.arg_title,t.arg_create_time`)
+		t.arg_id, t.arg_title,t.arg_create_time
+		ORDER BY t.arg_create_time DESC`)
 	case "specificPost":
 		rows, err = db.Query(`SELECT
 		t.arg_id, t.arg_title, t.arg_create_time,

@@ -8,15 +8,15 @@ import (
 )
 
 // Create a new argument entry
-func Create(arg *config.Argument) (string, error) {
+func Create(arg *config.Argument) (*config.WSResponse, error) {
 	db, err := openConn()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer db.Close()
-	lastInsertID, err := createArgument(db, arg.Title)
+	lastInsertID, err := createArgument(db, arg)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	for _, opinion := range arg.Opinions {
 		err := createOpinion(db, opinion, lastInsertID)
@@ -24,7 +24,11 @@ func Create(arg *config.Argument) (string, error) {
 			log.Error(err.Error())
 		}
 	}
-	return "Argument created", nil
+	resp := &config.WSResponse{
+		Msg:        "Argument created",
+		ArgumentID: lastInsertID,
+	}
+	return resp, nil
 }
 
 func createOpinion(db *sql.DB, opinion *config.Opinion, argumentID int) error {
@@ -39,8 +43,11 @@ func createOpinion(db *sql.DB, opinion *config.Opinion, argumentID int) error {
 	return nil
 }
 
-func createArgument(db *sql.DB, title string) (int, error) {
+func createArgument(db *sql.DB, arg *config.Argument) (int, error) {
 	var lastInsertID int
-	err := db.QueryRow("INSERT INTO arguments (arg_title) VALUES($1) returning arg_id", title).Scan(&lastInsertID)
+	err := db.QueryRow(`INSERT INTO arguments
+	(arg_title, user_id)
+	VALUES($1, $2)
+	returning arg_id`, arg.Title, arg.UserID).Scan(&lastInsertID)
 	return lastInsertID, err
 }
