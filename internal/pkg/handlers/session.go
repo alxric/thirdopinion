@@ -23,12 +23,6 @@ func sessionResponse(c echo.Context) *config.WSResponse {
 	resp := &config.WSResponse{
 		User: &config.User{},
 	}
-	headers := c.Request().Header
-	if len(headers["Origin"]) != 1 || headers["Origin"][0] != "http://localhost:8080" {
-		c.Logger().Error("Invalid origin header!")
-		resp.Error = "Unauthorized request"
-		return resp
-	}
 	var err error
 	resp.User, err = validateToken(c)
 	if err != nil {
