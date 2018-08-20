@@ -1,0 +1,5 @@
+[all]
+18.197.43.249
+[all:vars]
+ansible_connection=ssh
+ansible_ssh_user=ec2-user

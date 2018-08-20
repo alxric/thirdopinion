@@ -1,0 +1,49 @@
+---
+- name: Generate Postgres config
+  become: true
+  template:
+    src: pg_hba.conf.j2
+    dest: /var/lib/pgsql/data/pg_hba.conf
+
+- name: Start postgres service
+  become: true
+  tags:
+    - start
+    - restart
+  service:
+    name: postgresql
+    state: started
+
+- name: Generate table creation sql
+  template:
+    src: create_tables.sql.j2
+    dest: /tmp/create_tables.sql
+  register: table_sql
+
+- name: Create DB tables
+  shell: "PGPASSWORD={{ pgsql.password }} psql -U thirdopinion thirdopinion < /tmp/create_tables.sql"
+  when: table_sql.changed
+
+- name: Stop Thirdopinion application
+  tags:
+    - stop
+    - restart
+  docker_container:
+    name: thirdopinion
+    state: absent
+
+- name: Start Thirdopinion application
+  tags:
+    - start
+    - restart
+  docker_container:
+    name: thirdopinion
+    state: started
+    image: "321296546084.dkr.ecr.eu-central-1.amazonaws.com/thirdopinion:{{ thirdopinion.version }}"
+    network_mode: host
+    env:
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: thirdopinion
+      POSTGRES_USER: thirdopinion
+      POSTGRES_PASSWORD: "{{ pgsql.password }}"

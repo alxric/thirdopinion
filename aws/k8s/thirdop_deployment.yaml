@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thirdopinion-deployment
+  labels:
+    app: thirdopinion
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: thirdopinion
+  template:
+    metadata:
+      labels:
+        app: thirdopinion
+    spec:
+      containers:
+      - name: thirdopinion
+        image: 321296546084.dkr.ecr.eu-central-1.amazonaws.com/thirdopinion:latest
+        ports:
+        - containerPort: 8080

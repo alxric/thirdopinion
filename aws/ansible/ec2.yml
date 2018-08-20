@@ -1,0 +1,7 @@
+---
+- name: Setup AWS EC2 instance
+  vars_files:
+    - secrets.yml
+  hosts: all
+  roles:
+    - ec2

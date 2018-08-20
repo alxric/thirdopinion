@@ -1,0 +1,35 @@
+CREATE TABLE users (
+    email character varying(60),
+    pw_hash character varying(60),
+    activated boolean DEFAULT false,
+    user_id serial primary key
+);
+
+CREATE TABLE user_sessions (
+    user_id integer,
+    last_seen timestamp without time zone DEFAULT timezone('utc'::text, now()),
+    session_key character varying(60),
+    session_id serial primary key
+);
+
+CREATE TABLE arguments (
+    arg_title character varying(120),
+    arg_create_time timestamp without time zone DEFAULT timezone('utc'::text, now()),
+    arg_id serial primary key,
+    user_id integer
+);
+
+CREATE TABLE opinions (
+    arg_id integer,
+    person integer,
+    text text,
+    opinion_id serial primary key,
+    opinion_timestamp timestamp without time zone DEFAULT timezone('utc'::text, now())
+);
+
+CREATE TABLE votes (
+    arg_id integer,
+    person integer,
+    user_id integer,
+    vote_id serial primary key
+);
