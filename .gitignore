@@ -1,3 +1,4 @@
 web/app/*/node_modules/.cache
 CREDENTIALS
 *.zip
+aws/terraform/.terraform/plugins/
